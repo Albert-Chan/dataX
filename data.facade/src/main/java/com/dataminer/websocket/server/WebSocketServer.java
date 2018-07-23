@@ -1,18 +1,16 @@
-package websocket.server;
+package com.dataminer.websocket.server;
 
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.ContextHandler;
 
-public class WebsocketTestServer {
+public class WebSocketServer {
 	public static void main(String args[]) {
-		Server server = new Server(7777);
 
 		ContextHandler context = new ContextHandler();
 		context.setContextPath("/test");
-		
-		WebSocketHandlerTest test = new WebSocketHandlerTest();
-		context.setHandler(test);
+		context.setHandler(new ChannelHandler());
 
+		Server server = new Server(7777);
 		server.setHandler(context);
 		try {
 			server.start();
