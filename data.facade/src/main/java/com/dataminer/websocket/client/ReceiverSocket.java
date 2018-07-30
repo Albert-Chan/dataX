@@ -12,12 +12,12 @@ import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 
 @WebSocket(maxTextMessageSize = 64 * 1024)
-public class DataReceiverSocket {
+public class ReceiverSocket {
 
-	protected static final Logger LOG = Logger.getLogger(DataReceiverSocket.class);
+	protected static final Logger LOG = Logger.getLogger(ReceiverSocket.class);
 	private final CountDownLatch closeLatch;
 
-	public DataReceiverSocket() {
+	public ReceiverSocket() {
 		this.closeLatch = new CountDownLatch(1);
 	}
 
@@ -37,7 +37,8 @@ public class DataReceiverSocket {
 	}
 
 	@OnWebSocketMessage
-	public void onMessage(String msg) {
-		LOG.info(String.format("<<<<<<<<<<<<<<<<<<<<< %s%n", msg));
+	public void onMessage(Session session, String msg) {
+		LOG.info(String.format("%s: %s%n", session.getRemoteAddress(), msg));
 	}
+
 }

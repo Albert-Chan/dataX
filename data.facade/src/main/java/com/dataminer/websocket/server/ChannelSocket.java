@@ -19,8 +19,8 @@ public class ChannelSocket {
 
 	@OnWebSocketConnect
 	public void onConnect(Session session) throws Exception {
-		LOG.info("server: @OnWebSocketConnect");
 		if (session.isOpen()) {
+			LOG.info(session.getRemoteAddress() + " attached.");
 			endpoints.offer(session);
 		}
 	}
@@ -28,12 +28,12 @@ public class ChannelSocket {
 	@OnWebSocketClose
 	public void OnWebSocketClose(Session session, int i, String string) {
 		endpoints.remove(session);
-		LOG.info("server: @OnWebSocketClose");
+		LOG.info(session.getRemoteAddress() + " detached.");
 	}
 
 	@OnWebSocketMessage
 	public void onMessage(Session thisSession, String msg) throws IOException {
-		LOG.info(String.format("<<<<<<<<<<<<<<<<<<%s%n", msg));
+		LOG.info(String.format("%s: %s%n", thisSession.getRemoteAddress(), msg));
 		for (Session session : endpoints) {
 			if ((!session.equals(thisSession)) && session.isOpen()) {
 				session.getRemote().sendString(msg);

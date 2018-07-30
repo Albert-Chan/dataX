@@ -12,12 +12,12 @@ import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 
 @WebSocket(maxTextMessageSize = 64 * 1024)
-public class DataSenderSocket {
-	protected static final Logger LOG = Logger.getLogger(DataSenderSocket.class);
+public class SenderSocket {
+	protected static final Logger LOG = Logger.getLogger(SenderSocket.class);
 
 	private final CountDownLatch closeLatch;
 
-	public DataSenderSocket() {
+	public SenderSocket() {
 		this.closeLatch = new CountDownLatch(1);
 	}
 
@@ -35,7 +35,7 @@ public class DataSenderSocket {
 	}
 
 	@OnWebSocketMessage
-	public void onMessage(String msg) {
-		LOG.info(String.format("<<<<<<<<<<<<<<<<<<<<< %s%n", msg));
+	public void onMessage(Session session, String msg) {
+		// The sender ignores all incoming message.
 	}
 }

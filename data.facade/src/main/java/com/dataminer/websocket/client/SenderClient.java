@@ -11,13 +11,13 @@ import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
 
-public class DataSenderClient {
+public class SenderClient {
 	private WebSocketClient client;
-	private DataSenderSocket socket = new DataSenderSocket();
+	private SenderSocket socket = new SenderSocket();
 
 	private Future<Session> futureSession;
 
-	public DataSenderClient() {
+	public SenderClient() {
 		this.client = new WebSocketClient();
 	}
 
@@ -41,14 +41,4 @@ public class DataSenderClient {
 		}
 	}
 
-	public static void main(String[] args) throws Exception {
-		String destURI = "ws://127.0.0.1:7777/test/";
-		DataSenderClient sender = new DataSenderClient();
-		try {
-			sender.connect(destURI);
-			sender.send("ddd");
-		} finally {
-			//sender.stop();
-		}
-	}
 }

@@ -5,7 +5,7 @@
 	<groupId>com.dataminer</groupId>
 	<artifactId>data.facade</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>oData as data facade</name>
+	<name>Kafka-Websocket as data facade</name>
 
 	<dependencies>
 		<dependency>
@@ -13,7 +13,7 @@
 			<artifactId>data-miner</artifactId>
 			<version>0.0.1</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>com.alibaba</groupId>
 			<artifactId>fastjson</artifactId>
@@ -68,54 +68,11 @@
 			<version>9.4.10.v20180503</version>
 		</dependency>
 
-
-
-
-
-
+		<!-- https://mvnrepository.com/artifact/org.mybatis/mybatis -->
 		<dependency>
-			<groupId>org.apache.olingo</groupId>
-			<artifactId>odata-commons-api</artifactId>
-			<version>4.0.0</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.olingo</groupId>
-			<artifactId>odata-commons-core</artifactId>
-			<version>4.0.0</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.apache.olingo</groupId>
-			<artifactId>odata-server-api</artifactId>
-			<version>4.0.0</version>
-			<scope>compile</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.olingo</groupId>
-			<artifactId>odata-server-core</artifactId>
-			<version>4.0.0</version>
-			<scope>runtime</scope>
-		</dependency>
-
-
-		<dependency>
-			<groupId>org.apache.olingo</groupId>
-			<artifactId>odata-client-api</artifactId>
-			<version>4.0.0</version>
-			<scope>compile</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.olingo</groupId>
-			<artifactId>odata-client-core</artifactId>
-			<version>4.0.0</version>
-			<scope>runtime</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.apache.olingo</groupId>
-			<artifactId>odata-server-sample</artifactId>
-			<version>4.0.0-beta-02</version>
-			<type>war</type>
+			<groupId>org.mybatis</groupId>
+			<artifactId>mybatis</artifactId>
+			<version>3.4.6</version>
 		</dependency>
 
 
