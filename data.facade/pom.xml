@@ -10,7 +10,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>com.dataminer</groupId>
-			<artifactId>data-miner</artifactId>
+			<artifactId>commons</artifactId>
 			<version>0.0.1</version>
 		</dependency>
 
@@ -94,8 +94,8 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.1</version>
 				<configuration>
-					<source>8</source>
-					<target>8</target>
+					<source>10</source>
+					<target>10</target>
 					<encoding>UTF-8</encoding>
 				</configuration>
 			</plugin>
