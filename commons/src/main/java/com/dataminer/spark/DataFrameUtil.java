@@ -1,8 +1,12 @@
-package com.dataminer.util;
+package com.dataminer.spark;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.sql.Types;
 import java.util.Map;
 import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.spark.annotation.Experimental;
 import org.apache.spark.sql.DataFrame;
@@ -53,9 +57,6 @@ public class DataFrameUtil {
 		return sqlc.read().jdbc(dbProps.getProperty("url"), tableName, dbProps);
 	}
 
-	// dbtable could be table nam or sql sentence like (select * from TBL_NAME) as
-	// tmp
-
 	/**
 	 * this one is to support table with query instead of fetching all like the
 	 * previous one
@@ -63,27 +64,73 @@ public class DataFrameUtil {
 	 * @param sqlc
 	 * @param optionMap
 	 *            Map( "driver" -> "oracle.jdbc.driver.OracleDriver" "url" ->
-	 *            "jdbc:oracle:thin:@127.0.0.1:1521:orcl", "dbtable" -> table
-	 *            name or any sql sentence in format ( "(select cast(grid as int) as
+	 *            "jdbc:oracle:thin:@127.0.0.1:1521:orcl", "dbtable" -> table name
+	 *            or any sql sentence in format ( "(select cast(grid as int) as
 	 *            grid, cast(tazid as int) as tazid, perc from TBL_GRID_TAZ_PERC
 	 *            where version = 20161022) grid_temp" ) "user"-> "xxxx" "password"
 	 *            -> "xxxx" )
 	 * @return DataFrame contains records from table or table with query
 	 */
-	public static DataFrame readFromTable(SQLContext sqlc, Map<String, String> optionMap) {
+	public static DataFrame fromJDBC(SQLContext sqlc, Map<String, String> optionMap) {
 		return sqlc.read().format("jdbc").options(optionMap).load();
 	}
 
 	/**
+	 * Writes a data frame into a given database table.
+	 * 
 	 * @param dataFrame
-	 *            dataframe holds records for
+	 *            data frame as the input
 	 * @param tableName
-	 *            table to insert table, default mode is APPEND
+	 *            table as the destination, default mode is APPEND
 	 * @param dbProps
 	 *            database connection relevant props
 	 */
-	public static void writeToTable(DataFrame dataFrame, String tableName, Properties dbProps) {
+	public static void toJDBC(DataFrame dataFrame, String tableName, Properties dbProps) {
 		dataFrame.write().mode(SaveMode.Append).jdbc(dbProps.getProperty("url"), tableName, dbProps);
+	}
+
+	private static final Pattern ROW_BRACKET_PATTERN = Pattern.compile("\\[(.*)\\]");
+
+	/**
+	 * Writes a data frame into HDFS as plain text files.
+	 * 
+	 * @param dataFrame
+	 * @param hdfsPath
+	 * @throws IOException
+	 * @throws URISyntaxException
+	 */
+	public static void toHDFSAsText(DataFrame dataFrame, String hdfsPath) throws IOException, URISyntaxException {
+		RDDUtil.toHDFSAsText(dataFrame.javaRDD().map(row -> {
+			// remove the '[]' from row.toString().
+			// e.g. [1,2,3] ===> 1,2,3
+			Matcher matcher = ROW_BRACKET_PATTERN.matcher(row.toString());
+			if (matcher.find()) {
+				return matcher.group(1);
+			} else {
+				throw new Exception("JavaRDD<Row> row format error");
+			}
+		}), hdfsPath);
+	}
+
+	/**
+	 * Reads from parquet files from the HDFS paths, return a data frame.
+	 * 
+	 * @param sqlc
+	 * @param parquetPath
+	 * @return the data frame
+	 */
+	public static DataFrame fromParquet(SQLContext sqlc, String... parquetPath) {
+		return sqlc.read().parquet(parquetPath);
+	}
+
+	/**
+	 * Restores the data frame to the parquet file.
+	 * 
+	 * @param dataFrame
+	 * @param parquetPath
+	 */
+	public static void toParquet(DataFrame dataFrame, String parquetPath) {
+		dataFrame.write().parquet(parquetPath);
 	}
 
 }

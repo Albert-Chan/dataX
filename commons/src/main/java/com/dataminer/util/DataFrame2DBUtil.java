@@ -19,6 +19,7 @@ import com.dataminer.constants.AnalyticTypes;
 import com.dataminer.constants.DateTimeFormats;
 import com.dataminer.db.ConnectionPools;
 import com.dataminer.db.SQLExecutor;
+import com.dataminer.spark.DataFrameUtil;
 
 import scala.Tuple3;
 
@@ -84,7 +85,7 @@ public class DataFrame2DBUtil {
 		DataFrame expandedDF = withColumnExpanded(df.selectExpr(fieldMapper), tableName, date, type);
 
 		// save to database
-		DataFrameUtil.writeToTable(expandedDF, tableName, getSparkSQLProperties("result"));
+		DataFrameUtil.toJDBC(expandedDF, tableName, getSparkSQLProperties("result"));
 	}
 
 	/**
