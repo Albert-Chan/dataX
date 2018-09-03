@@ -2,6 +2,7 @@ package com.dataminer.datetime;
 
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
+import java.util.Objects;
 
 public class FastDateTimeFormatter {
 
@@ -14,7 +15,7 @@ public class FastDateTimeFormatter {
 
 	public static DateTimeFormatter ofPattern(String pattern) {
 		DateTimeFormatter cache = formatters.get().get(pattern);
-		if (null == cache) {
+		if (Objects.isNull(cache)) {
 			cache = DateTimeFormatter.ofPattern(pattern);
 			formatters.get().put(pattern, cache);
 		}

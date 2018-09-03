@@ -8,13 +8,11 @@ import java.time.ZonedDateTime;
 public class TimeStampConverter {
 	public static long localDateTime2TimeStamp(LocalDateTime ldt) {
 		ZonedDateTime zdt = ldt.atZone(ZoneId.systemDefault());
-		System.out.println(zdt);
 		return zdt.toInstant().toEpochMilli();
 	}
 
 	public static long localDateTime2TimeStamp(LocalDateTime ldt, String zoneId) {
 		ZonedDateTime zdt = ldt.atZone(ZoneId.of(zoneId));
-		System.out.println(zdt);
 		return zdt.toInstant().toEpochMilli();
 	}
 

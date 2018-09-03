@@ -10,6 +10,8 @@ import org.apache.spark.sql.DataFrame;
 import org.apache.spark.sql.SQLContext;
 
 import com.dataminer.constants.AnalyticTypes;
+import com.dataminer.spark.DataFrameUtil;
+import com.dataminer.spark.RDDUtil;
 
 public class DailyResultSaver {
 	private JavaSparkContext ctx;
@@ -44,7 +46,7 @@ public class DailyResultSaver {
 		if (HDFSBasePath.isPresent()) {
 			// save to HDFS and delete the same data at first
 			String hdfsPath = HDFSBasePath.get() + analyticDay;
-			HDFSUtil.exportToHDFS(hdfsPath, rdd);
+			RDDUtil.toHDFSAsText(rdd, hdfsPath);
 		}
 
 		if (tableName.isPresent() && schema.isPresent()) {
@@ -62,7 +64,7 @@ public class DailyResultSaver {
 		if (HDFSBasePath.isPresent()) {
 			// save to HDFS and delete the same data at first
 			String hdfsPath = HDFSBasePath.get() + analyticDay;
-			HDFSUtil.exportToHDFS(hdfsPath, df);
+			DataFrameUtil.toHDFSAsText(df, hdfsPath);
 		}
 
 		if (tableName.isPresent()) {
