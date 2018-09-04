@@ -12,13 +12,23 @@ import org.apache.hadoop.fs.Path;
 
 public class HDFSUtil {
 
+	/**
+	 * Gets the file system which the URI belongs to. The URI should be a full path
+	 * contains schema and authority; Otherwise, the default configuration will be
+	 * used.
+	 * 
+	 * @param uri
+	 * @return
+	 * @throws IOException
+	 * @throws URISyntaxException
+	 */
 	private static FileSystem getFileSystem(String uri) throws IOException, URISyntaxException {
 		FileSystem fs = FileSystem.get(new URI(uri), new Configuration());
 		return fs;
 	}
 
-	public static boolean exists(String uri) throws IOException, URISyntaxException {
-		FileStatus[] status = getFileSystem(uri).globStatus(new Path(uri));
+	public static boolean exists(String uriPattern) throws IOException, URISyntaxException {
+		FileStatus[] status = getFileSystem(uriPattern).globStatus(new Path(uriPattern));
 		return status != null && status.length > 0;
 	}
 
