@@ -4,15 +4,12 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Objects;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.hadoop.io.compress.CompressionCodec;
 import org.apache.hadoop.io.compress.SnappyCodec;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
-import org.apache.spark.sql.Row;
 
 import com.dataminer.hdfs.HDFSUtil;
 import com.hadoop.compression.lzo.LzopCodec;
@@ -20,30 +17,36 @@ import com.hadoop.compression.lzo.LzopCodec;
 public class RDDUtil {
 
 	public static JavaRDD<String> union(JavaSparkContext ctx, List<String> paths) {
-		JavaRDD<String> rdd = ctx.emptyRDD();
+		JavaRDD<String> rdd = null;
 		for (String path : paths) {
-			// TODO InvalidInputExcepton?
-			rdd = rdd.union(ctx.textFile(path));
+			// If the paths doesn't exist, InvalidInputException will be thrown. But it will
+			// not be thrown in this union method call phase. union only puts the paths into
+			// JobConf.
+			if (Objects.isNull(rdd)) {
+				rdd = ctx.textFile(path);
+			} else {
+				rdd = rdd.union(ctx.textFile(path));
+			}
 		}
 		return rdd;
 	}
 
 	@SafeVarargs
-	public static <R> JavaRDD<R> union(JavaSparkContext ctx, JavaRDD<R>... rdds) {
-		JavaRDD<R> gatherRDD = ctx.emptyRDD();
-		for (JavaRDD<R> rdd : rdds) {
-			gatherRDD = gatherRDD.union(rdd);
+	public static <R> JavaRDD<R> union(JavaRDD<R>... rdds) {
+		JavaRDD<R> unitedRDD = rdds[0];
+		for (int i = 1; i < rdds.length; i++) {
+			unitedRDD = unitedRDD.union(rdds[i]);
 		}
-		return gatherRDD;
+		return unitedRDD;
 	}
 
 	@SafeVarargs
-	public static <K, V> JavaPairRDD<K, V> union(JavaSparkContext ctx, JavaPairRDD<K, V>... rdds) {
-		JavaPairRDD<K, V> gatherRDD = JavaPairRDD.fromJavaRDD(ctx.emptyRDD());
-		for (JavaPairRDD<K, V> rdd : rdds) {
-			gatherRDD = gatherRDD.union(rdd);
+	public static <K, V> JavaPairRDD<K, V> union(JavaPairRDD<K, V>... rdds) {
+		JavaPairRDD<K, V> unitedRDD = rdds[0];
+		for (int i = 1; i < rdds.length; i++) {
+			unitedRDD = unitedRDD.union(rdds[i]);
 		}
-		return gatherRDD;
+		return unitedRDD;
 	}
 
 	/**
@@ -55,7 +58,8 @@ public class RDDUtil {
 	 * @throws IOException
 	 * @throws URISyntaxException
 	 */
-	private static boolean checkBeforeWrite(String hdfsPath, boolean overwrite) throws IOException, URISyntaxException {
+	@NotDistributedTransaction
+	private static boolean checkOnWrite(String hdfsPath, boolean overwrite) throws IOException, URISyntaxException {
 		if (Objects.nonNull(hdfsPath) && !hdfsPath.isEmpty()) {
 			if (HDFSUtil.exists(hdfsPath)) {
 				if (overwrite) {
@@ -71,10 +75,10 @@ public class RDDUtil {
 		return false;
 	}
 
+	@NotDistributedTransaction
 	public static void toHDFSAsText(JavaRDD<?> rdd, String hdfsPath, boolean overwrite,
 			Class<? extends CompressionCodec> codecClazz) throws IOException, URISyntaxException {
-		// FIXME need a distributed lock to make the method as a transaction.
-		if (checkBeforeWrite(hdfsPath, overwrite)) {
+		if (checkOnWrite(hdfsPath, overwrite)) {
 			if (null == codecClazz) {
 				rdd.saveAsTextFile(hdfsPath);
 			} else {
@@ -83,40 +87,48 @@ public class RDDUtil {
 		}
 	}
 
+	@NotDistributedTransaction
 	public static void toHDFSAsText(JavaRDD<?> rdd, String hdfsPath, boolean overwrite)
 			throws IOException, URISyntaxException {
 		toHDFSAsText(rdd, hdfsPath, overwrite, null);
 	}
 
+	@NotDistributedTransaction
 	public static void toHDFSAsText(JavaRDD<?> rdd, String hdfsPath) throws IOException, URISyntaxException {
 		toHDFSAsText(rdd, hdfsPath, true, null);
 	}
 
+	@NotDistributedTransaction
 	public static void toHDFSAsSnappy(JavaRDD<?> rdd, String hdfsPath, boolean overwrite)
 			throws IOException, URISyntaxException {
 		toHDFSAsText(rdd, hdfsPath, overwrite, SnappyCodec.class);
 	}
 
+	@NotDistributedTransaction
 	public static void toHDFSAsSnappy(JavaRDD<?> rdd, String hdfsPath) throws IOException, URISyntaxException {
 		toHDFSAsText(rdd, hdfsPath, true, SnappyCodec.class);
 	}
 
+	@NotDistributedTransaction
 	public static void toHDFSAsLZO(JavaRDD<?> rdd, String hdfsPath, boolean overwrite)
 			throws IOException, URISyntaxException {
 		toHDFSAsText(rdd, hdfsPath, overwrite, LzopCodec.class);
 	}
 
+	@NotDistributedTransaction
 	public static void toHDFSAsLZO(JavaRDD<?> rdd, String hdfsPath) throws IOException, URISyntaxException {
 		toHDFSAsText(rdd, hdfsPath, true, LzopCodec.class);
 	}
 
+	@NotDistributedTransaction
 	public static void toHDFSAsSequence(JavaRDD<?> rdd, String hdfsPath, boolean overwrite)
 			throws IOException, URISyntaxException {
-		if (checkBeforeWrite(hdfsPath, overwrite)) {
+		if (checkOnWrite(hdfsPath, overwrite)) {
 			rdd.saveAsObjectFile(hdfsPath);
 		}
 	}
 
+	@NotDistributedTransaction
 	public static void toHDFSAsSequence(JavaRDD<?> rdd, String hdfsPath) throws IOException, URISyntaxException {
 		toHDFSAsSequence(rdd, hdfsPath, true);
 	}
